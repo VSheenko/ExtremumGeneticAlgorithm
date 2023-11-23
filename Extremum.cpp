@@ -1,7 +1,3 @@
-//
-// Created by vovan on 20.11.2023.
-//
-
 #include "Extremum.h"
 
 /**
@@ -10,13 +6,11 @@
  * @param progressDisplayFlag отображение дополнительных сообщений о поколениях
  * @return один из экстремум данной функции
  */
-double Extremum::GetExtremum(double (*function)(double, double), bool progressDisplayFlag) {
+void Extremum::GetExtremum(double (*function)(double, double)) {
     this->function = function;
 
     std::vector<std::string> population = InitPopulation();
     SimulationOfLife(population);
-    int t = 3;
-    return 0;
 }
 
 /**
@@ -120,22 +114,49 @@ std::vector<double> Extremum::IndividualsToVec(std::string& individual) {
 void Extremum::SimulationOfLife(std::vector<std::string>& curPopulation) {
     std::vector<double> generationScore(INDIVIDUALS_NUMBER);
     std::vector<std::string> parents(INDIVIDUALS_NUMBER / 2);
-    double best = 0;
+    std::map<std::string, int> alreadyFoundCoords;
+    std::string key;
+    std::vector<double> extremumCoords(2);
+
+    double lastBest = -1;
+    double curBest = 0;
+
+    int repeatCount = 0;
     for (int i = 1; i <= NUMBER_OF_GENERATION; i++) {
         GetGenerationScore(curPopulation, generationScore);
+        curBest = SortPopulation(curPopulation, generationScore);
+
+
+
+        if (curBest == 1) {
+            extremumCoords = IndividualsToVec(curPopulation[0]);
+            extremumCoords[0] = round(std::abs(extremumCoords[0])) * (extremumCoords[0] < 0 ? -1 : 1);
+            extremumCoords[1] = round(std::abs(extremumCoords[1])) * (extremumCoords[1] < 0 ? -1 : 1);
+
+            key = std::to_string(extremumCoords[0]) + " " + std::to_string(extremumCoords[1]);
+            if (alreadyFoundCoords.count(key) == 0) {
+                alreadyFoundCoords[key] = 1;
+                std::cout << key << '\n';
+            }
+
+            curPopulation = InitPopulation();
+            curBest = 0;
+            continue;
+        }
+
+        if (std::fabs(curBest - lastBest) < std::numeric_limits<double>::epsilon()) repeatCount += 1;
+        else repeatCount = 0;
+
+        if (repeatCount >= 3000) {
+            curPopulation = InitPopulation();
+            continue;
+        }
+        lastBest = curBest;
+
         SelectParent(curPopulation, generationScore, parents);
         CreateNewPopulation(parents, curPopulation);
         mutation(curPopulation);
-
-
-        for (int j = 0; j < curPopulation.size(); j++) {
-            if (generationScore[j] >= best) {
-                best = generationScore[j];
-                std::cout << best << ' ' << curPopulation[j] << " == " << IndividualsToVec(curPopulation[j])[0] << ' ' << IndividualsToVec(curPopulation[j])[1] << "==" << function(IndividualsToVec(curPopulation[j])[0], IndividualsToVec(curPopulation[j])[1]) <<'\n';
-            }
-        }
     }
-    int qe = 0;
 }
 
 void Extremum::GetGenerationScore(std::vector<std::string> &population, std::vector<double>& generationScore) {
@@ -144,11 +165,15 @@ void Extremum::GetGenerationScore(std::vector<std::string> &population, std::vec
     }
 }
 
-void Extremum::SortPopulation(std::vector<std::string> &population, std::vector<double> &generationScore) {
+double Extremum::SortPopulation(std::vector<std::string> &population, std::vector<double> &generationScore) {
     assert(population.size() == generationScore.size() && "population.size() == generationScore.size()");
+    double maxScore = generationScore[generationScore.size() - 1];
+
     for (int i = 0; i < generationScore.size() - 1; i++)
     {
+        maxScore = std::max(maxScore, generationScore[i]);
         int max_index = i;
+
         for (int j = i + 1; j < generationScore.size(); j++)
         {
             if (generationScore[j] > generationScore[max_index])
@@ -162,29 +187,17 @@ void Extremum::SortPopulation(std::vector<std::string> &population, std::vector<
             std::swap(population[i], population[max_index]);
         }
     }
-}
 
-void Extremum::SelectParent(std::vector<std::string> &population, std::vector<double> &generateScore, std::vector<std::string> &parents) {
-    for (int i = 0; i < 7; i++) {
-        int first = std::rand() % INDIVIDUALS_NUMBER;
-        int second = std::rand() % INDIVIDUALS_NUMBER;
-
-        if (generateScore[first] > generateScore[second]) {
-            parents[i] = population[first];
-        }
-        else {
-            parents[i] = population[second];
-        }
-    }
+    return round(maxScore * 100) / 100;
 }
 
 void Extremum::CreateNewPopulation(std::vector<std::string> &parents, std::vector<std::string> &newPopulation) {
     for (int i = 0; i < INDIVIDUALS_NUMBER / 2; i++) {
-        int first = std::rand() % 7;
-        int second = std::rand() % 7;
+        int first = std::rand() % (GENE_LENGTH / 2);
+        int second = std::rand() % (GENE_LENGTH / 2);
 
-        std::string child1 = CrossParents2(parents[first], parents[second]);
-        std::string child2 = CrossParents2(parents[second], parents[first]);
+        std::string child1 = CrossParents(parents[first], parents[second]);
+        std::string child2 = CrossParents(parents[second], parents[first]);
 
 
         newPopulation[2*i] = child1;
@@ -193,19 +206,6 @@ void Extremum::CreateNewPopulation(std::vector<std::string> &parents, std::vecto
 }
 
 std::string Extremum::CrossParents(std::string &p1, std::string &p2) {
-    int index = std::rand() % (GENE_LENGTH / 2);
-
-    std::string child_part1;
-    std::string child_part2;
-
-    child_part1 = p1.substr(0, index) + p2.substr(index, (GENE_LENGTH / 2) - index);
-    index = std::rand() % (GENE_LENGTH / 2);
-    child_part2 = p1.substr(GENE_LENGTH / 2, index) + p2.substr(index, (GENE_LENGTH / 2) - index);
-
-    return child_part1 + child_part2;
-}
-
-std::string Extremum::CrossParents2(std::string &p1, std::string &p2) {
     int index = std::rand() % GENE_LENGTH;
     std::string child = p1.substr(0, index) + p2.substr(index, GENE_LENGTH - index);
 
@@ -226,5 +226,13 @@ void Extremum::mutation(std::vector<std::string> &population) {
                 population[index][i] = '0';
             }
         }
+    }
+}
+
+void Extremum::SelectParent(std::vector<std::string> &population, std::vector<double> &generationScore, std::vector<std::string> &parents) {
+    assert(parents.size() == INDIVIDUALS_NUMBER / 2 && "parents.size() == INDIVIDUALS_NUMBER");
+
+    for (int i = 0; i < INDIVIDUALS_NUMBER / 2; i++){
+        parents[i] = population[i];
     }
 }
