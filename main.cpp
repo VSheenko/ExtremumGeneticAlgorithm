@@ -12,15 +12,20 @@ double function2(double x, double y) {
     return std::pow(x, 2) + x*y + 2*std::pow(y, 2) - x - 4*y;
 }
 
+double function3(double x, double y) { // не работает
+    return std::pow(x - 1, 4) - std::pow(y + 2, 4);
+}
 
-
+double function4(double x, double y){
+    return std::pow(x, 2)*std::pow(y, 2)*(1 - x - y);
+}
 int main() {
     std::srand(std::time(NULL));
     Extremum extremum;
 
 
-    extremum.GetExtremum(function2);
-    std::cout << "Алгоритм завершил работу" << std::endl;
+    extremum.GetExtremum(function);
+    std::cout << "The End!" << std::endl;
     return 0;
 }
 

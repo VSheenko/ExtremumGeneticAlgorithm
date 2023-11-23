@@ -193,8 +193,8 @@ double Extremum::SortPopulation(std::vector<std::string> &population, std::vecto
 
 void Extremum::CreateNewPopulation(std::vector<std::string> &parents, std::vector<std::string> &newPopulation) {
     for (int i = 0; i < INDIVIDUALS_NUMBER / 2; i++) {
-        int first = std::rand() % (GENE_LENGTH / 2);
-        int second = std::rand() % (GENE_LENGTH / 2);
+        int first = std::rand() % 7;
+        int second = std::rand() % 7;
 
         std::string child1 = CrossParents(parents[first], parents[second]);
         std::string child2 = CrossParents(parents[second], parents[first]);

@@ -13,7 +13,7 @@ public:
     void GetExtremum(double (*function)(double, double));
 private:
     static const int CHROMOSOME_SIGN_LENGTH = 1;
-    static const int CHROMOSOME_INTEGER_PART = 5;
+    static const int CHROMOSOME_INTEGER_PART = 4;
     static const int CHROMOSOME_FRACTIONAL_PART = 6;
     static const int GENE_LENGTH = (CHROMOSOME_SIGN_LENGTH + CHROMOSOME_INTEGER_PART + CHROMOSOME_FRACTIONAL_PART) * 2;
 
