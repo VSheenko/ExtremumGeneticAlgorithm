@@ -126,17 +126,18 @@ void Extremum::SimulationOfLife(std::vector<std::string>& curPopulation) {
         GetGenerationScore(curPopulation, generationScore);
         curBest = SortPopulation(curPopulation, generationScore);
 
-
-
         if (curBest == 1) {
             extremumCoords = IndividualsToVec(curPopulation[0]);
             extremumCoords[0] = round(std::abs(extremumCoords[0])) * (extremumCoords[0] < 0 ? -1 : 1);
             extremumCoords[1] = round(std::abs(extremumCoords[1])) * (extremumCoords[1] < 0 ? -1 : 1);
 
+            extremumCoords[0] = ZeroFix(extremumCoords[0]);
+            extremumCoords[1] = ZeroFix(extremumCoords[1]);
+
             key = std::to_string(extremumCoords[0]) + " " + std::to_string(extremumCoords[1]);
             if (alreadyFoundCoords.count(key) == 0) {
                 alreadyFoundCoords[key] = 1;
-                std::cout << key << '\n';
+                std::cout << key <<  " ==> " << function(extremumCoords[0], extremumCoords[1]) << '\n';
             }
 
             curPopulation = InitPopulation();
@@ -147,7 +148,7 @@ void Extremum::SimulationOfLife(std::vector<std::string>& curPopulation) {
         if (std::fabs(curBest - lastBest) < std::numeric_limits<double>::epsilon()) repeatCount += 1;
         else repeatCount = 0;
 
-        if (repeatCount >= 3000) {
+        if (repeatCount >= 2000) {
             curPopulation = InitPopulation();
             continue;
         }
@@ -235,4 +236,11 @@ void Extremum::SelectParent(std::vector<std::string> &population, std::vector<do
     for (int i = 0; i < INDIVIDUALS_NUMBER / 2; i++){
         parents[i] = population[i];
     }
+}
+
+double Extremum::ZeroFix(double x) {
+    if (std::abs(x) == 0)
+        return 0;
+    else
+        return x;
 }

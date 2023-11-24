@@ -13,7 +13,7 @@ public:
     void GetExtremum(double (*function)(double, double));
 private:
     static const int CHROMOSOME_SIGN_LENGTH = 1;
-    static const int CHROMOSOME_INTEGER_PART = 4;
+    static const int CHROMOSOME_INTEGER_PART = 6;
     static const int CHROMOSOME_FRACTIONAL_PART = 6;
     static const int GENE_LENGTH = (CHROMOSOME_SIGN_LENGTH + CHROMOSOME_INTEGER_PART + CHROMOSOME_FRACTIONAL_PART) * 2;
 
@@ -21,7 +21,7 @@ private:
     static const int INDIVIDUALS_NUMBER = 14;
 
     double M_PI = 3.14159265358979323846;
-    double LOCALE_RADIUS = 0.2;
+    double LOCALE_RADIUS = 0.5;
 private:
     double (*function)(double, double);
     static std::vector<std::string> InitPopulation();
@@ -34,6 +34,7 @@ private:
     void CreateNewPopulation(std::vector<std::string>&, std::vector<std::string>&);
     std::string CrossParents(std::string&, std::string&);
     void mutation(std::vector<std::string>&);
+    double ZeroFix(double);
 };
 
 #endif //EXTREMUMGENETICALGORITHM_EXTREMUM_H
