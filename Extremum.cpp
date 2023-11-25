@@ -1,10 +1,9 @@
 #include "Extremum.h"
 
 /**
- *Самое начало алгоритма
+ * Самое начало алгоритма
  * @param function функция вида F(x, y), у которой необходим найти экстремум
- * @param progressDisplayFlag отображение дополнительных сообщений о поколениях
- * @return один из экстремум данной функции
+ * @return Выводит в консоль все найденные точки экстремума
  */
 void Extremum::GetExtremum(double (*function)(double, double)) {
     this->function = function;
@@ -15,7 +14,7 @@ void Extremum::GetExtremum(double (*function)(double, double)) {
 
 /**
  * Случайным образом создает создает первую популяцию, состоящую из определенного числа особей
- * @return вектор, состоящий из особей со случайным набором генов
+ * @return Возвращает вектор, состоящий из особей со случайным набором генов
  */
 std::vector<std::string> Extremum::InitPopulation() {
     std::vector<std::string> population(INDIVIDUALS_NUMBER);
@@ -38,7 +37,7 @@ std::vector<std::string> Extremum::InitPopulation() {
  * Фитнес-функция, которая определяет меру приспособленности особи.
  * Рисуем окружность вокруг координаты особи и смотрим какие точки больше, какие меньше.
  * Возвращаем наибольшую долю (либо т. максимума, либо т. минимума).
- * @param individual конкретная особь
+ * @param individual Конкретная особь
  */
 double Extremum::Fitness(std::string& individual) {
     std::vector<double> coords = IndividualsToVec(individual);
@@ -111,6 +110,10 @@ std::vector<double> Extremum::IndividualsToVec(std::string& individual) {
     return {x, y};
 }
 
+/**
+ * Описание жизненного цикла поколения
+ * @param curPopulation
+ */
 void Extremum::SimulationOfLife(std::vector<std::string>& curPopulation) {
     std::vector<double> generationScore(INDIVIDUALS_NUMBER);
     std::vector<std::string> parents(INDIVIDUALS_NUMBER / 2);
@@ -160,12 +163,23 @@ void Extremum::SimulationOfLife(std::vector<std::string>& curPopulation) {
     }
 }
 
+/**
+ * Заполняет вектор показателями пригодности отдельной особи (насколько близка она к точке экстремума)
+ * @param population
+ * @param generationScore
+ */
 void Extremum::GetGenerationScore(std::vector<std::string> &population, std::vector<double>& generationScore) {
     for (int i = 0; i < population.size(); i++) {
         generationScore[i] = Fitness(population[i]);
     }
 }
 
+/**
+ * Сортирует одновременно два вектора: популяцию и вектор с ее показателями пригодности
+ * @param population
+ * @param generationScore
+ * @return Возвращает наибольший показатель пригодности популяции
+ */
 double Extremum::SortPopulation(std::vector<std::string> &population, std::vector<double> &generationScore) {
     assert(population.size() == generationScore.size() && "population.size() == generationScore.size()");
     double maxScore = generationScore[generationScore.size() - 1];
@@ -192,6 +206,11 @@ double Extremum::SortPopulation(std::vector<std::string> &population, std::vecto
     return round(maxScore * 100) / 100;
 }
 
+/**
+ * Создает новую популяцию из родителей
+ * @param parents
+ * @param newPopulation
+ */
 void Extremum::CreateNewPopulation(std::vector<std::string> &parents, std::vector<std::string> &newPopulation) {
     for (int i = 0; i < INDIVIDUALS_NUMBER / 2; i++) {
         int first = std::rand() % 7;
@@ -206,6 +225,12 @@ void Extremum::CreateNewPopulation(std::vector<std::string> &parents, std::vecto
     }
 }
 
+/**
+ * Скрещивает родителей
+ * @param p1
+ * @param p2
+ * @return
+ */
 std::string Extremum::CrossParents(std::string &p1, std::string &p2) {
     int index = std::rand() % GENE_LENGTH;
     std::string child = p1.substr(0, index) + p2.substr(index, GENE_LENGTH - index);
@@ -213,12 +238,16 @@ std::string Extremum::CrossParents(std::string &p1, std::string &p2) {
     return child;
 }
 
+/**
+ * Случайным образом инвертирует подцепочку генов
+ * @param population
+ */
 void Extremum::mutation(std::vector<std::string> &population) {
     int index = std::rand() % 5;
     int border1_of_mutation = std::rand() % GENE_LENGTH;
     int border2_of_mutation = std::rand() % GENE_LENGTH;
 
-    if (border1_of_mutation - border2_of_mutation != 0 && abs(border1_of_mutation - border2_of_mutation) < 10) {
+    if (border1_of_mutation - border2_of_mutation != 0 && std::abs(border1_of_mutation - border2_of_mutation) < 10) {
         for (int i = std::min(border1_of_mutation, border2_of_mutation); i < std::max(border1_of_mutation, border2_of_mutation); i++) {
             if (population[index][i] == '0') {
                 population[index][i] = '1';
@@ -230,6 +259,12 @@ void Extremum::mutation(std::vector<std::string> &population) {
     }
 }
 
+/**
+ * Для продолжения рода :3 отбирает половину лучших представителей поколения
+ * @param population
+ * @param generationScore
+ * @param parents
+ */
 void Extremum::SelectParent(std::vector<std::string> &population, std::vector<double> &generationScore, std::vector<std::string> &parents) {
     assert(parents.size() == INDIVIDUALS_NUMBER / 2 && "parents.size() == INDIVIDUALS_NUMBER");
 
@@ -241,6 +276,5 @@ void Extremum::SelectParent(std::vector<std::string> &population, std::vector<do
 double Extremum::ZeroFix(double x) {
     if (std::abs(x) == 0)
         return 0;
-    else
-        return x;
+    return x;
 }
