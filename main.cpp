@@ -21,10 +21,6 @@ double function6(double x, double y){ // тяжело ищется, но 35 12 �
     return std::pow(y, 3) + 2*std::pow(x, 2) - 12*x*y + 4*x - 12*y + 2;
 }
 
-double function7(double x, double y){
-    return std::pow(x, 2) * y - 4*x*std::pow(y, 1/2) - 6*std::pow(y, 2) + 5;
-}
-
 // --------------------------------------------------------------------------------------------------------------
 
 double function3(double x, double y) { // не работает
@@ -40,7 +36,7 @@ int main() {
     Extremum extremum;
 
 
-    extremum.GetExtremum(function7);
+    extremum.GetExtremum(function6);
     std::cout << "The End!" << std::endl;
     return 0;
 }
